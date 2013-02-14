@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
+    <url>
+        <loc>http://fifigyuri.github.com/websidedown/blog/archives/</loc>
+        <lastmod>2013-02-14T16:27:41+01:00</lastmod>
+    </url>
+    <url>
+        <loc>http://fifigyuri.github.com/websidedown/</loc>
+        <lastmod>2013-02-14T16:27:41+01:00</lastmod>
+    </url>
+    <url>
+        <loc>http://fifigyuri.github.com/websidedown/robots.txt</loc>
+        <lastmod>2013-02-14T16:27:41+01:00</lastmod>
+    </url>
+</urlset>
