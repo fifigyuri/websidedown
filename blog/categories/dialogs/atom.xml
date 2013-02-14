@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: dialogs | Web Side Down]]></title>
+  <link href="http://fifigyuri.github.com/websidedown/blog/categories/dialogs/atom.xml" rel="self"/>
+  <link href="http://fifigyuri.github.com/websidedown/"/>
+  <updated>2013-02-14T17:23:22+01:00</updated>
+  <id>http://fifigyuri.github.com/websidedown/</id>
+  <author>
+    <name><![CDATA[George Frivolt]]></name>
+    <email><![CDATA[gyorgy.frivolt@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Non-Modal Inline Dialogs: Ask Questions in Awesome Ways]]></title>
+    <link href="http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/"/>
+    <updated>2012-07-15T18:00:00+02:00</updated>
+    <id>http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs</id>
+    <content type="html"><![CDATA[<p><img class="right" src="/images/modaldialog.png" width="300" title="&#34;simple modal dialog with a yes-no question&#34;" alt="&#34;simple modal dialog with a yes-no question&#34;"></p>
+
+<p>Asking questions, confirmations from the users is a pretty usual part of any
+user interface. Still often I find tackling this simple task solved in
+unsatisfying way. The simplest solution is the <code>confirm('ask your question..');</code>
+dialog. However, this often ruins the otherwise possibly clean design. Confirm
+dialogs are modal and therefore users can not proceed further actions without
+answering the questions. But what if you do not need immediate answers?
+Often it is enough leaving the dialog questions opened. In such situation try
+using "inline dialogs".</p>
+
+<p>Let's build a simple scenario. We have three simple events which the user can
+trigger: calling a firemen, calling police or ambulance. Obviously triggering
+these events could be useful to handle with a simple question before they are
+really triggered. If this security question is answered positively, the event
+is triggered, otherwise the original <em>Call the ...</em> link is rendered.
+The dialog blocks are divided into a trigger and question part.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>inline-dialogs.html </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;DIV</span> <span class="na">CLASS=</span><span class="s">&#39;dialog_block&#39;</span> <span class="na">DATA-MESSAGE=</span><span class="s">&#39;Calling the firemen!&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;A</span> <span class="na">HREF=</span><span class="s">&quot;#&quot;</span> <span class="na">CLASS=</span><span class="s">&quot;dialog_trigger&quot;</span><span class="nt">&gt;</span>Call the Firemen!<span class="nt">&lt;/A&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;DIV</span> <span class="na">CLASS=</span><span class="s">&quot;dialog_question&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    Call?
+</span><span class='line'>    <span class="nt">&lt;A</span> <span class="na">HREF=</span><span class="s">&quot;#&quot;</span> <span class="na">CLASS=</span><span class="s">&quot;answer_yes&quot;</span><span class="nt">&gt;</span>Yes<span class="nt">&lt;/A&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;A</span> <span class="na">HREF=</span><span class="s">&quot;#&quot;</span> <span class="na">CLASS=</span><span class="s">&quot;answer_no&quot;</span><span class="nt">&gt;</span>No<span class="nt">&lt;/A&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/DIV&gt;</span>
+</span><span class='line'><span class="nt">&lt;/DIV&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c">&lt;!-- do something similar for the two other calls --&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>For handling the dialog actions I use jQuery now. We need only three simple
+callbacks for handlers: activation of the question trigger, handler for the yes
+and the no answer.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>inline-dialogs.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">turnOffDialogQuestion</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">$dialog_block</span> <span class="o">=</span> <span class="nx">getDialogBlock</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">$dialog_block</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.dialog_question&#39;</span><span class="p">).</span><span class="nx">fadeOut</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">,</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">$dialog_block</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.dialog_trigger&#39;</span><span class="p">).</span><span class="nx">fadeIn</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">);</span> <span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">};</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">getDialogBlock</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">$</span><span class="p">(</span><span class="nx">el</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s1">&#39;.dialog_block&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.dialog_trigger&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">ev</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">$dialog_block</span> <span class="o">=</span> <span class="nx">getDialogBlock</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">fadeOut</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">$dialog_block</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.dialog_question&#39;</span><span class="p">).</span><span class="nx">fadeIn</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">);</span> <span class="p">});</span>
+</span><span class='line'><span class="nx">ev</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'><span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.dialog_question .answer_yes&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">ev</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">alert</span><span class="p">(</span><span class="nx">getDialogBlock</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">));</span>
+</span><span class='line'><span class="nx">turnOffDialogQuestion</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'><span class="nx">ev</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'><span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.dialog_question .answer_no&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">ev</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">turnOffDialogQuestion</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'><span class="nx">ev</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'><span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The full source codes of this simple example can be downloaded from here:
+<a href="codes/inline-dialogs.html">HTML</a>, <a href="codes/inline-dialogs.js">javascript</a>.
+By following on the HTML link the example can be also tried out.</p>
+]]></content>
+  </entry>
+  
+</feed>

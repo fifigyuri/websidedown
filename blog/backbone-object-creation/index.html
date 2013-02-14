@@ -1,0 +1,389 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Backbone forms: How to get ids for objects created on the client side? - Web Side Down</title>
+  <meta name="author" content="George Frivolt">
+
+  
+  <meta name="description" content="I am building an application which is built with Backbone.js. It contains several forms, which make it possible to create sub-items in collections. I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/">
+  <link href="/websidedown/favicon.png" rel="icon">
+  <link href="/websidedown/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/websidedown/javascripts/modernizr-2.0.js"></script>
+  <script src="/websidedown/javascripts/ender.js"></script>
+  <script src="/websidedown/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/websidedown" rel="alternate" title="Web Side Down" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30611343-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/websidedown/">Web Side Down</a></h1>
+  
+    <h2>dynamic web development</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss email">
+  <li><a href="http://feeds.feedburner.com/websidedown" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+    <li><a href="http://eepurl.com/fV_hT" rel="subscribe-email" title="subscribe via email">Email</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fifigyuri.github.com/websidedown" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/websidedown/">Blog</a></li>
+  <li><a href="/websidedown/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Backbone Forms: How to Get Ids for Objects Created on the Client Side?</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-10T22:22:00+01:00" pubdate data-updated="true">Feb 10<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I am building an application which is built with Backbone.js. It contains several forms, which make it possible to create sub-items in <em>collections</em>. I run into the issue of getting the id for the recently created items. Let me explain the scenario:</p>
+
+<ol>
+<li>a new model instance is created with and an empty <code>id</code></li>
+<li>the form gets saved triggering a POST or PUT request</li>
+<li>the server receives and saves the new and updated items</li>
+<li>the new items get the <code>ids</code> filled out</li>
+<li>all items are sent back with updated server-side <code>ids</code></li>
+</ol>
+
+
+<p>The issue is with mapping the new <code>ids</code> to the instances which are on the client side without an <code>id</code>.</p>
+
+<p>Backbone.js generates a unique client-side <code>cid</code> for every object. The idea was to serialize the <code>cid</code> and send it back from the server with the server side <code>id</code>. As server I use rails. I added new virtual attribute <code>cid</code> to the model and serialized it. For the client models serializing (<code>toJSON</code>) and parsing needed to be updated. Method <code>toJSON</code> was the easy part:</p>
+
+<figure class='code'><figcaption><span>tojson.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">toJSON</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">toJSON</span><span class="p">.</span><span class="nx">__super__</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">),</span>
+</span><span class='line'>      <span class="p">{</span> <span class="nx">cid</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">cid</span> <span class="p">})</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Bit trickier is handling of the response coming from the server. It&#8217;s necessary to identify the existing item using the <code>cid</code> and update it with the new server side <code>id</code>. After exploring several possible ways, how to do it wrong, I was <a href="github.com/documentcloud/backbone/pull/2177">advised</a> to override the <code>parse</code> method.</p>
+
+<figure class='code'><figcaption><span>parse.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">parse</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">resp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">resp</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">cid</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">delete</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">existing</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">cid</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">existing</span> <span class="o">?</span> <span class="nx">existing</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">attrs</span><span class="p">).</span><span class="nx">attributes</span> <span class="o">:</span> <span class="nx">attrs</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">},</span> <span class="k">this</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That simple definition of the <code>parse</code> method showed me the elegance of backbone. Searching for a simple solution proved to be worthwhile.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">George Frivolt</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-10T22:22:00+01:00" pubdate data-updated="true">Feb 10<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/websidedown/blog/categories/backbone-/'>backbone,</a>, <a class='category' href='/websidedown/blog/categories/forms/'>forms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/" data-via="fifigyuri" data-counturl="http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/websidedown/blog/restricting-models-with-heimdallr/" title="Previous Post: Restricting Models with Heimdallr">&laquo; Restricting Models with Heimdallr</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/websidedown/blog/backbone-object-creation/">Backbone forms: How to get ids for objects created on the client side?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/restricting-models-with-heimdallr/">Restricting Models with Heimdallr</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/non-modal-inline-dialogs/">Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/lorem-ipsum/">Lorem Ipsum</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fifigyuri',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/websidedown/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("fifigyuri", 2, false);
+    });
+  </script>
+  <script src="/websidedown/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/fifigyuri" class="twitter-follow-button" data-show-count="false">Follow @fifigyuri</a>
+  
+</section>
+
+
+<section>
+  <h1>My Pinboard</h1>
+  <ul id="pinboard_linkroll">Fetching linkroll...</ul>
+  <p><a href="http://pinboard.in/u:fifigyuri">My Pinboard Bookmarks &raquo;</a></p>
+</section>
+<script type="text/javascript">
+  var linkroll = 'pinboard_linkroll'; //id target for pinboard list
+  var pinboard_user = "fifigyuri"; //id target for pinboard list
+  var pinboard_count = 3; //id target for pinboard list
+  (function(){
+    var pinboardInit = document.createElement('script');
+    pinboardInit.type = 'text/javascript';
+    pinboardInit.async = true;
+    pinboardInit.src = '/javascripts/pinboard.js';
+    document.getElementsByTagName('head')[0].appendChild(pinboardInit);
+  })();
+</script>
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/fifigyuri?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - George Frivolt -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'websidedownblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/';
+        var disqus_url = 'http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Web Side Down</title>
+  <title>Non-Modal Inline Dialogs: Ask Questions in Awesome Ways - Web Side Down</title>
   <meta name="author" content="George Frivolt">
 
   
-  <meta name="description" content="I am building an application which is built with Backbone.js. It contains several forms, which make it possible to create sub-items in collections. I &hellip;">
+  <meta name="description" content="Asking questions, confirmations from the users is a pretty usual part of any
+user interface. Still often I find tackling this simple task solved in &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://fifigyuri.github.com/websidedown/">
+  <link rel="canonical" href="http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/">
   <link href="/websidedown/favicon.png" rel="icon">
   <link href="/websidedown/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/websidedown/javascripts/modernizr-2.0.js"></script>
@@ -76,205 +77,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/websidedown/blog/backbone-object-creation/">Backbone Forms: How to Get Ids for Objects Created on the Client Side?</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-10T22:22:00+01:00" pubdate data-updated="true">Feb 10<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I am building an application which is built with Backbone.js. It contains several forms, which make it possible to create sub-items in <em>collections</em>. I run into the issue of getting the id for the recently created items. Let me explain the scenario:</p>
-
-<ol>
-<li>a new model instance is created with and an empty <code>id</code></li>
-<li>the form gets saved triggering a POST or PUT request</li>
-<li>the server receives and saves the new and updated items</li>
-<li>the new items get the <code>ids</code> filled out</li>
-<li>all items are sent back with updated server-side <code>ids</code></li>
-</ol>
-
-
-<p>The issue is with mapping the new <code>ids</code> to the instances which are on the client side without an <code>id</code>.</p>
-
-<p>Backbone.js generates a unique client-side <code>cid</code> for every object. The idea was to serialize the <code>cid</code> and send it back from the server with the server side <code>id</code>. As server I use rails. I added new virtual attribute <code>cid</code> to the model and serialized it. For the client models serializing (<code>toJSON</code>) and parsing needed to be updated. Method <code>toJSON</code> was the easy part:</p>
-
-<figure class='code'><figcaption><span>tojson.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">toJSON</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">toJSON</span><span class="p">.</span><span class="nx">__super__</span><span class="p">.</span><span class="nx">constructor</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">),</span>
-</span><span class='line'>      <span class="p">{</span> <span class="nx">cid</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">cid</span> <span class="p">})</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Bit trickier is handling of the response coming from the server. It&#8217;s necessary to identify the existing item using the <code>cid</code> and update it with the new server side <code>id</code>. After exploring several possible ways, how to do it wrong, I was <a href="github.com/documentcloud/backbone/pull/2177">advised</a> to override the <code>parse</code> method.</p>
-
-<figure class='code'><figcaption><span>parse.js </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">parse</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">resp</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">resp</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">cid</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">delete</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">existing</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">cid</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">existing</span> <span class="o">?</span> <span class="nx">existing</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">attrs</span><span class="p">).</span><span class="nx">attributes</span> <span class="o">:</span> <span class="nx">attrs</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">},</span> <span class="k">this</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That simple definition of the <code>parse</code> method showed me the elegance of backbone. Searching for a simple solution proved to be worthwhile.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/websidedown/blog/restricting-models-with-heimdallr/">Restricting Models With Heimdallr</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-16T14:28:00+02:00" pubdate data-updated="true">Jul 16<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img class="right" src="/websidedown/images/cards.jpg" width="180" title="&#34;deck of cards, some have visible faces&#34;" alt="&#34;deck of cards, some have visible faces&#34;"></p>
-
-<p>I found myself several times implementing the logic for restictions in controllers.
-Althought that might be fine, when the things get more complex, this practice
-can become hard to maintain. As modeling restrictions belongs to the core logic of
-the application, perhaphs they should be placed there..</p>
-
-<p>That&#8217;s what <a href="http://github.com/roundlake/heimdallr">heimdallr</a> is supposed to resolve.
-This gem provides model level security by wrapping the model classes and
-instances by a proxy. The access rights are declared in the model:</p>
-
-<figure class='code'><figcaption><span>card.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Card</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">Heimdallr</span><span class="p">:</span><span class="ss">:Model</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:person</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">attr_accessible</span> <span class="ss">:suit</span><span class="p">,</span> <span class="ss">:rank</span><span class="p">,</span> <span class="ss">:backside</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">restrict</span> <span class="k">do</span> <span class="o">|</span><span class="n">person</span><span class="p">,</span> <span class="n">card</span><span class="o">|</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">arbiter?</span>
-</span><span class='line'>      <span class="c1"># the arbiter can do anything</span>
-</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{}</span>
-</span><span class='line'>    <span class="k">elsif</span> <span class="n">person</span><span class="o">.</span><span class="n">playing?</span>
-</span><span class='line'>      <span class="c1"># if the user is playing, only the card at hand is visible</span>
-</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">where</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;person_id = ?&#39;</span><span class="p">,</span> <span class="n">person</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The <code>restrict</code> block can take more parameters, based on these we can decide how
-to restrict the model. The last parameter (<code>card</code> in the example) is an
-instance of the model, if it is <code>nil</code> the model class was passed to the restrict
-block. The restriction can be thus called on either the model class or on a
-concrete instance: <code>Card.restrict(person)</code> vs <code>card.restrict(person)</code>.</p>
-
-<p>Heimdallr maintains a scope for fetching and deletion. Scope restriction are obviously
-useful when restricting the model class. Calling <code>all</code> on the proxied model
-returns only the cards visible by the person. Wondering how to simply ask
-whether a card instance is visible by the person? <code>card.restrict(person).visible?</code>
-does just that. For testing destroyability of a record there is <code>destroyable?</code>.</p>
-
-<p>I covered briefly scope restriction using  heimdallr in this post. However, there
-is yet more how heimdallr can help. Finer restrictions, such as attribute visibility
-and updatability are often crucial as well. But let&#8217;s leave this for later.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/websidedown/blog/non-modal-inline-dialogs/">Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a></h1>
+      <h1 class="entry-title">Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</h1>
     
     
       <p class="meta">
@@ -297,7 +105,7 @@ and updatability are often crucial as well. But let&#8217;s leave this for later
   </header>
 
 
-  <div class="entry-content"><p><img class="right" src="/websidedown/images/modaldialog.png" width="300" title="&#34;simple modal dialog with a yes-no question&#34;" alt="&#34;simple modal dialog with a yes-no question&#34;"></p>
+<div class="entry-content"><p><img class="right" src="/websidedown/images/modaldialog.png" width="300" title="&#34;simple modal dialog with a yes-no question&#34;" alt="&#34;simple modal dialog with a yes-no question&#34;"></p>
 
 <p>Asking questions, confirmations from the users is a pretty usual part of any
 user interface. Still often I find tackling this simple task solved in
@@ -405,22 +213,16 @@ and the no answer.</p>
 <a href="codes/inline-dialogs.html">HTML</a>, <a href="codes/inline-dialogs.js">javascript</a>.
 By following on the HTML link the example can be also tried out.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/websidedown/blog/lorem-ipsum/">Lorem Ipsum</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">George Frivolt</span></span>
+
+      
 
 
 
@@ -432,41 +234,50 @@ By following on the HTML link the example can be also tried out.</p>
   
 
 
-<time datetime="2012-05-28T19:48:00+02:00" pubdate data-updated="true">May 28<span>th</span>, 2012</time>
-        
-      </p>
+<time datetime="2012-07-15T18:00:00+02:00" pubdate data-updated="true">Jul 15<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/websidedown/blog/categories/dialogs/'>dialogs</a>, <a class='category' href='/websidedown/blog/categories/javascript-/'>javascript,</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><p><img class="left" src="/websidedown/images/lorem-ipsum.jpeg" width="170" title="&#34;first words&#34;" alt="&#34;first words&#34;"></p>
-
-<p>Welcome to a yet another blog about web development. Why should you bother reading
-posts from this one? I see web development as a platform to understand different
-technologies, languages or concepts. Web is still a dominating media, understanding
-it has practical reasons, it can give you a way to make living. However, I find it
-more practical to look at practical things playfully (..isn&#8217;t playfulness the best
-way how to understand things anyway..?). There is going to be only one sticking
-point in the posts, and that&#8217;s the Web. I will not stick to languages, technologies,..
-I&#8217;m not restricting myself to pure programming topics, we can sail to post about web design
-topics just as well.</p>
-
-<p>I hope, you&#8217;ll find this useful and a bit refreshing.. So worth of following.
-This blog has an rss-feed and a newsletter, please subscribe if you want to be
-updated regularly.</p>
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/" data-via="fifigyuri" data-counturl="http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
 </div>
-  
-  
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/websidedown/blog/lorem-ipsum/" title="Previous Post: Lorem Ipsum">&laquo; Lorem Ipsum</a>
+      
+      
+        <a class="basic-alignment right" href="/websidedown/blog/restricting-models-with-heimdallr/" title="Next Post: Restricting Models with Heimdallr">Restricting Models with Heimdallr &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
 
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/websidedown/blog/archives">Blog Archives</a>
-    
-  </div>
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
+  </section>
+
+</div>
+
 <aside class="sidebar">
   
     <section>
@@ -495,7 +306,7 @@ updated regularly.</p>
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <script type="text/javascript">
@@ -523,7 +334,7 @@ updated regularly.</p>
 <section>
   <h1>Latest Tweets</h1>
   <ul id="tweets">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   <script type="text/javascript">
     $.domReady(function(){
@@ -539,7 +350,7 @@ updated regularly.</p>
 
 <section>
   <h1>My Pinboard</h1>
-  <ul id="pinboard_linkroll">Fetching linkroll&#8230;</ul>
+  <ul id="pinboard_linkroll">Fetching linkroll...</ul>
   <p><a href="http://pinboard.in/u:fifigyuri">My Pinboard Bookmarks &raquo;</a></p>
 </section>
 <script type="text/javascript">
@@ -570,6 +381,7 @@ updated regularly.</p>
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -584,7 +396,10 @@ updated regularly.</p>
       var disqus_shortname = 'websidedownblog';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/';
+        var disqus_url = 'http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: forms | Web Side Down]]></title>
+  <link href="http://fifigyuri.github.com/websidedown/blog/categories/forms/atom.xml" rel="self"/>
+  <link href="http://fifigyuri.github.com/websidedown/"/>
+  <updated>2013-02-14T17:23:22+01:00</updated>
+  <id>http://fifigyuri.github.com/websidedown/</id>
+  <author>
+    <name><![CDATA[George Frivolt]]></name>
+    <email><![CDATA[gyorgy.frivolt@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Backbone forms: How to get ids for objects created on the client side?]]></title>
+    <link href="http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/"/>
+    <updated>2013-02-10T22:22:00+01:00</updated>
+    <id>http://fifigyuri.github.com/websidedown/blog/backbone-object-creation</id>
+    <content type="html"><![CDATA[<p>I am building an application which is built with Backbone.js. It contains several forms, which make it possible to create sub-items in <em>collections</em>. I run into the issue of getting the id for the recently created items. Let me explain the scenario:</p>
+
+<ol>
+<li>a new model instance is created with and an empty <code>id</code></li>
+<li>the form gets saved triggering a POST or PUT request</li>
+<li>the server receives and saves the new and updated items</li>
+<li>the new items get the <code>ids</code> filled out</li>
+<li>all items are sent back with updated server-side <code>ids</code></li>
+</ol>
+
+
+<p>The issue is with mapping the new <code>ids</code> to the instances which are on the client side without an <code>id</code>.</p>
+
+<p>Backbone.js generates a unique client-side <code>cid</code> for every object. The idea was to serialize the <code>cid</code> and send it back from the server with the server side <code>id</code>. As server I use rails. I added new virtual attribute <code>cid</code> to the model and serialized it. For the client models serializing (<code>toJSON</code>) and parsing needed to be updated. Method <code>toJSON</code> was the easy part:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>tojson.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">toJSON</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">toJSON</span><span class="p">.</span><span class="o">&lt;</span><span class="nx">strong</span><span class="o">&gt;</span><span class="kr">super</span><span class="o">&lt;</span><span class="err">/strong&gt;.constructor.apply(this, arguments),&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span>  <span class="p">{</span> <span class="nx">cid</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">cid</span> <span class="p">})</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Bit trickier is handling of the response coming from the server. It's necessary to identify the existing item using the <code>cid</code> and update it with the new server side <code>id</code>. After exploring several possible ways, how to do it wrong, I was <a href="github.com/documentcloud/backbone/pull/2177">advised</a> to override the <code>parse</code> method.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>parse.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">parse</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">resp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">resp</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">cid</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
+</span><span class='line'><span class="k">delete</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">cid</span><span class="p">;</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">existing</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">cid</span><span class="p">);</span>
+</span><span class='line'><span class="k">return</span> <span class="nx">existing</span> <span class="o">?</span> <span class="nx">existing</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">attrs</span><span class="p">).</span><span class="nx">attributes</span> <span class="o">:</span> <span class="nx">attrs</span><span class="p">;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">},</span> <span class="k">this</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>That simple definition of the <code>parse</code> method showed me the elegance of backbone. Searching for a simple solution proved to be worthwhile.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Restricting Models with Heimdallr - Web Side Down</title>
+  <meta name="author" content="George Frivolt">
+
+  
+  <meta name="description" content="I found myself several times implementing the logic for restictions in controllers.
+Althought that might be fine, when the things get more complex, &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/">
+  <link href="/websidedown/favicon.png" rel="icon">
+  <link href="/websidedown/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/websidedown/javascripts/modernizr-2.0.js"></script>
+  <script src="/websidedown/javascripts/ender.js"></script>
+  <script src="/websidedown/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/websidedown" rel="alternate" title="Web Side Down" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30611343-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/websidedown/">Web Side Down</a></h1>
+  
+    <h2>dynamic web development</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss email">
+  <li><a href="http://feeds.feedburner.com/websidedown" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+    <li><a href="http://eepurl.com/fV_hT" rel="subscribe-email" title="subscribe via email">Email</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fifigyuri.github.com/websidedown" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/websidedown/">Blog</a></li>
+  <li><a href="/websidedown/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Restricting Models With Heimdallr</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-16T14:28:00+02:00" pubdate data-updated="true">Jul 16<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/websidedown/images/cards.jpg" width="180" title="&#34;deck of cards, some have visible faces&#34;" alt="&#34;deck of cards, some have visible faces&#34;"></p>
+
+<p>I found myself several times implementing the logic for restictions in controllers.
+Althought that might be fine, when the things get more complex, this practice
+can become hard to maintain. As modeling restrictions belongs to the core logic of
+the application, perhaphs they should be placed there..</p>
+
+<p>That&#8217;s what <a href="http://github.com/roundlake/heimdallr">heimdallr</a> is supposed to resolve.
+This gem provides model level security by wrapping the model classes and
+instances by a proxy. The access rights are declared in the model:</p>
+
+<figure class='code'><figcaption><span>card.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Card</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Heimdallr</span><span class="p">:</span><span class="ss">:Model</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:person</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">attr_accessible</span> <span class="ss">:suit</span><span class="p">,</span> <span class="ss">:rank</span><span class="p">,</span> <span class="ss">:backside</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">restrict</span> <span class="k">do</span> <span class="o">|</span><span class="n">person</span><span class="p">,</span> <span class="n">card</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">arbiter?</span>
+</span><span class='line'>      <span class="c1"># the arbiter can do anything</span>
+</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{}</span>
+</span><span class='line'>    <span class="k">elsif</span> <span class="n">person</span><span class="o">.</span><span class="n">playing?</span>
+</span><span class='line'>      <span class="c1"># if the user is playing, only the card at hand is visible</span>
+</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">where</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;person_id = ?&#39;</span><span class="p">,</span> <span class="n">person</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>restrict</code> block can take more parameters, based on these we can decide how
+to restrict the model. The last parameter (<code>card</code> in the example) is an
+instance of the model, if it is <code>nil</code> the model class was passed to the restrict
+block. The restriction can be thus called on either the model class or on a
+concrete instance: <code>Card.restrict(person)</code> vs <code>card.restrict(person)</code>.</p>
+
+<p>Heimdallr maintains a scope for fetching and deletion. Scope restriction are obviously
+useful when restricting the model class. Calling <code>all</code> on the proxied model
+returns only the cards visible by the person. Wondering how to simply ask
+whether a card instance is visible by the person? <code>card.restrict(person).visible?</code>
+does just that. For testing destroyability of a record there is <code>destroyable?</code>.</p>
+
+<p>I covered briefly scope restriction using  heimdallr in this post. However, there
+is yet more how heimdallr can help. Finer restrictions, such as attribute visibility
+and updatability are often crucial as well. But let&#8217;s leave this for later.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">George Frivolt</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-16T14:28:00+02:00" pubdate data-updated="true">Jul 16<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/websidedown/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/" data-via="fifigyuri" data-counturl="http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/websidedown/blog/non-modal-inline-dialogs/" title="Previous Post: Non-Modal Inline Dialogs: Ask Questions in Awesome Ways">&laquo; Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a>
+      
+      
+        <a class="basic-alignment right" href="/websidedown/blog/backbone-object-creation/" title="Next Post: Backbone forms: How to get ids for objects created on the client side?">Backbone forms: How to get ids for objects created on the client side? &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/websidedown/blog/backbone-object-creation/">Backbone forms: How to get ids for objects created on the client side?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/restricting-models-with-heimdallr/">Restricting Models with Heimdallr</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/non-modal-inline-dialogs/">Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a>
+      </li>
+    
+      <li class="post">
+        <a href="/websidedown/blog/lorem-ipsum/">Lorem Ipsum</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fifigyuri',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/websidedown/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("fifigyuri", 2, false);
+    });
+  </script>
+  <script src="/websidedown/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/fifigyuri" class="twitter-follow-button" data-show-count="false">Follow @fifigyuri</a>
+  
+</section>
+
+
+<section>
+  <h1>My Pinboard</h1>
+  <ul id="pinboard_linkroll">Fetching linkroll...</ul>
+  <p><a href="http://pinboard.in/u:fifigyuri">My Pinboard Bookmarks &raquo;</a></p>
+</section>
+<script type="text/javascript">
+  var linkroll = 'pinboard_linkroll'; //id target for pinboard list
+  var pinboard_user = "fifigyuri"; //id target for pinboard list
+  var pinboard_count = 3; //id target for pinboard list
+  (function(){
+    var pinboardInit = document.createElement('script');
+    pinboardInit.type = 'text/javascript';
+    pinboardInit.async = true;
+    pinboardInit.src = '/javascripts/pinboard.js';
+    document.getElementsByTagName('head')[0].appendChild(pinboardInit);
+  })();
+</script>
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/fifigyuri?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - George Frivolt -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'websidedownblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/';
+        var disqus_url = 'http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

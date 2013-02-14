@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rails | Web Side Down]]></title>
+  <link href="http://fifigyuri.github.com/websidedown/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="http://fifigyuri.github.com/websidedown/"/>
+  <updated>2013-02-14T17:23:22+01:00</updated>
+  <id>http://fifigyuri.github.com/websidedown/</id>
+  <author>
+    <name><![CDATA[George Frivolt]]></name>
+    <email><![CDATA[gyorgy.frivolt@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Restricting Models with Heimdallr]]></title>
+    <link href="http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/"/>
+    <updated>2012-07-16T14:28:00+02:00</updated>
+    <id>http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr</id>
+    <content type="html"><![CDATA[<p><img class="right" src="/images/cards.jpg" width="180" title="&#34;deck of cards, some have visible faces&#34;" alt="&#34;deck of cards, some have visible faces&#34;"></p>
+
+<p>I found myself several times implementing the logic for restictions in controllers.
+Althought that might be fine, when the things get more complex, this practice
+can become hard to maintain. As modeling restrictions belongs to the core logic of
+the application, perhaphs they should be placed there..</p>
+
+<p>That's what <a href="http://github.com/roundlake/heimdallr">heimdallr</a> is supposed to resolve.
+This gem provides model level security by wrapping the model classes and
+instances by a proxy. The access rights are declared in the model:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>card.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Card</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Heimdallr</span><span class="p">:</span><span class="ss">:Model</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  belongs_to :person&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">attr_accessible</span> <span class="ss">:suit</span><span class="p">,</span> <span class="ss">:rank</span><span class="p">,</span> <span class="ss">:backside</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  restrict do |person, card|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">arbiter?</span>
+</span><span class='line'>  <span class="c1"># the arbiter can do anything</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="p">{}</span>
+</span><span class='line'><span class="k">elsif</span> <span class="n">person</span><span class="o">.</span><span class="n">playing?</span>
+</span><span class='line'>  <span class="c1"># if the user is playing, only the card at hand is visible</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">where</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;person_id = ?&#39;</span><span class="p">,</span> <span class="n">person</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The <code>restrict</code> block can take more parameters, based on these we can decide how
+to restrict the model. The last parameter (<code>card</code> in the example) is an
+instance of the model, if it is <code>nil</code> the model class was passed to the restrict
+block. The restriction can be thus called on either the model class or on a
+concrete instance: <code>Card.restrict(person)</code> vs <code>card.restrict(person)</code>.</p>
+
+<p>Heimdallr maintains a scope for fetching and deletion. Scope restriction are obviously
+useful when restricting the model class. Calling <code>all</code> on the proxied model
+returns only the cards visible by the person. Wondering how to simply ask
+whether a card instance is visible by the person? <code>card.restrict(person).visible?</code>
+does just that. For testing destroyability of a record there is <code>destroyable?</code>.</p>
+
+<p>I covered briefly scope restriction using  heimdallr in this post. However, there
+is yet more how heimdallr can help. Finer restrictions, such as attribute visibility
+and updatability are often crucial as well. But let's leave this for later.</p>
+]]></content>
+  </entry>
+  
+</feed>
