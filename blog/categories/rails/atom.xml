@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: rails | Web Side Down]]></title>
-  <link href="http://fifigyuri.github.com/websidedown/blog/categories/rails/atom.xml" rel="self"/>
-  <link href="http://fifigyuri.github.com/websidedown/"/>
-  <updated>2013-02-15T09:18:17+01:00</updated>
-  <id>http://fifigyuri.github.com/websidedown/</id>
+  <link href="http://websidedown.com/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="http://websidedown.com/"/>
+  <updated>2013-02-15T09:29:11+01:00</updated>
+  <id>http://websidedown.com/</id>
   <author>
     <name><![CDATA[George Frivolt]]></name>
     <email><![CDATA[gyorgy.frivolt@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Restricting Models with Heimdallr]]></title>
-    <link href="http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/"/>
+    <link href="http://websidedown.com/blog/restricting-models-with-heimdallr/"/>
     <updated>2012-07-16T14:28:00+02:00</updated>
-    <id>http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr</id>
+    <id>http://websidedown.com/blog/restricting-models-with-heimdallr</id>
     <content type="html"><![CDATA[<p><img class="right" src="/images/cards.jpg" width="180" title="&#34;deck of cards, some have visible faces&#34;" alt="&#34;deck of cards, some have visible faces&#34;"></p>
 
 <p>I found myself several times implementing the logic for restictions in controllers.

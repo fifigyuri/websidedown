@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://fifigyuri.github.com/websidedown/sitemap.xml 
+Sitemap: http://websidedown.com/sitemap.xml 

@@ -1,31 +1,31 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/blog/lorem-ipsum/</loc>
+        <loc>http://websidedown.com/blog/lorem-ipsum/</loc>
         <lastmod>2012-12-04T17:29:15+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/blog/non-modal-inline-dialogs/</loc>
+        <loc>http://websidedown.com/blog/non-modal-inline-dialogs/</loc>
         <lastmod>2012-12-04T17:29:15+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/blog/restricting-models-with-heimdallr/</loc>
+        <loc>http://websidedown.com/blog/restricting-models-with-heimdallr/</loc>
         <lastmod>2012-12-04T17:29:15+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/blog/backbone-object-creation/</loc>
+        <loc>http://websidedown.com/blog/backbone-object-creation/</loc>
         <lastmod>2013-02-13T12:45:36+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/blog/archives/</loc>
+        <loc>http://websidedown.com/blog/archives/</loc>
         <lastmod>2013-02-13T12:45:36+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/</loc>
+        <loc>http://websidedown.com/</loc>
         <lastmod>2013-02-13T12:45:36+01:00</lastmod>
     </url>
     <url>
-        <loc>http://fifigyuri.github.com/websidedown/robots.txt</loc>
+        <loc>http://websidedown.com/robots.txt</loc>
         <lastmod>2013-02-14T16:56:44+01:00</lastmod>
     </url>
 </urlset>
