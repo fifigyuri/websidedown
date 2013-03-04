@@ -23,5 +23,5 @@ $pad-wide: 40px;
 //$sidebar-width-wide: 300px;
 
 body {
-  @include box-shadow(rgba(white, 0.4) 0 0 25px, rgba(white, 0.2) 0 0 3px 1px inset);
+  @include box-shadow(black 0 0 25px, black 0 0 3px 1px inset);
 }
