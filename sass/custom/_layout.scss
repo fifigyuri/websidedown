@@ -24,4 +24,8 @@ $pad-wide: 40px;
 
 body {
   @include box-shadow(black 0 0 25px, black 0 0 3px 1px inset);
+
+  ol {
+    margin-left: 2em;
+  }
 }
