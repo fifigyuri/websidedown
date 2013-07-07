@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Restricting Models with Heimdallr - Web Side Down</title>
+  <title>Heimdallr with active model serializers - Web Side Down</title>
   <meta name="author" content="George Frivolt">
 
   
-  <meta name="description" content="I found myself several times implementing the logic for restictions in controllers.
-Althought that might be fine, when the things get more complex, &hellip;">
+  <meta name="description" content="I have introduced heimdallr in an earlier post. It is an excellent tool for securing models. heimdallr can create proxies for collections and records &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ Althought that might be fine, when the things get more complex, &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://websidedown.com/blog/restricting-models-with-heimdallr/">
+  <link rel="canonical" href="http://websidedown.com/blog/heimdallr-with-active-model-serializers/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -85,7 +84,7 @@ Althought that might be fine, when the things get more complex, &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Restricting Models With Heimdallr</h1>
+      <h1 class="entry-title">Heimdallr With Active Model Serializers</h1>
     
     
       <p class="meta">
@@ -101,25 +100,30 @@ Althought that might be fine, when the things get more complex, &hellip;">
   
 
 
-<time datetime="2012-07-16T14:28:00+02:00" pubdate data-updated="true">Jul 16<span>th</span>, 2012</time>
+<time datetime="2013-07-07T07:07:00+02:00" pubdate data-updated="true">Jul 7<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p><img class="right" src="/images/cards.jpg" width="180" title="&#34;deck of cards, some have visible faces&#34;" alt="&#34;deck of cards, some have visible faces&#34;"></p>
+<div class="entry-content"><p>I have introduced <a href="https://github.com/inossidabile/heimdallr">heimdallr</a> in an <a href="/blog/restricting-models-with-heimdallr">earlier post</a>. It is an excellent tool for securing models. <code>heimdallr</code> can create proxies for collections and records, it is possible to define scopes for fetching and deletion, and which messages are permitted to be forwarded to the proxied record. I use <code>active_model_serializers</code> for serialization. It provides an elegant way to define serialization rules for the models.</p>
 
-<p>I found myself several times implementing the logic for restictions in controllers.
-Althought that might be fine, when the things get more complex, this practice
-can become hard to maintain. As modeling restrictions belongs to the core logic of
-the application, perhaphs they should be placed there..</p>
+<p><code>active_model_serializers</code> does not work with the collections and records secured by a proxy out of the box. It would be good to know what should happen when a not permitted attribute is accessed on the model. I thought about two options:</p>
 
-<p>That&#8217;s what <a href="http://github.com/roundlake/heimdallr">heimdallr</a> is supposed to resolve.
-This gem provides model level security by wrapping the model classes and
-instances by a proxy. The access rights are declared in the model:</p>
+<ol>
+<li>the serializer could raise a permission error or</li>
+<li>it serializes a value interpretted as not readable.</li>
+</ol>
 
-<figure class='code'><figcaption><span>card.rb </span></figcaption>
+
+<p>I chose the second approach. However, as json does not know about symbols as ruby does, serializing unaccessible attributes as <code>nil</code> seems to a proper option. The consumers of the produced json need to agree on the interpretation of a <code>null</code> value in the received json as a not accessible attribute.</p>
+
+<p>Luckily the described strategy for serializing secured record is very simple. Heimdallr defines method <code>implicit</code> which returns a proxy with a strategy returning <code>nil</code> for unaccessible attributes.</p>
+
+<p>I conclude this post with the short code doing the trick described above:</p>
+
+<figure class='code'><figcaption><span>heimdallr_with_active_model_serializers.rb </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -137,47 +141,27 @@ instances by a proxy. The access rights are declared in the model:</p>
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Card</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">Heimdallr</span><span class="p">:</span><span class="ss">:Model</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="nb">require</span> <span class="s1">&#39;heimdallr&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;active_model_serializers&#39;</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:person</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">Heimdallr</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Proxy</span><span class="o">::</span><span class="no">Record</span>
+</span><span class='line'>    <span class="n">delegate</span> <span class="ss">:active_model_serializer</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:@record</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="n">attr_accessible</span> <span class="ss">:suit</span><span class="p">,</span> <span class="ss">:rank</span><span class="p">,</span> <span class="ss">:backside</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">restrict</span> <span class="k">do</span> <span class="o">|</span><span class="n">person</span><span class="p">,</span> <span class="n">card</span><span class="o">|</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">arbiter?</span>
-</span><span class='line'>      <span class="c1"># the arbiter can do anything</span>
-</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{}</span>
-</span><span class='line'>    <span class="k">elsif</span> <span class="n">person</span><span class="o">.</span><span class="n">playing?</span>
-</span><span class='line'>      <span class="c1"># if the user is playing, only the card at hand is visible</span>
-</span><span class='line'>      <span class="n">scope</span> <span class="ss">:fetch</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">where</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;person_id = ?&#39;</span><span class="p">,</span> <span class="n">person</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">read_attribute_for_serialization</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">implicit</span><span class="o">.</span><span class="n">send</span> <span class="nb">name</span>
 </span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Proxy</span><span class="o">::</span><span class="no">Collection</span>
+</span><span class='line'>    <span class="kp">include</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:ArraySerializerSupport</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The <code>restrict</code> block can take more parameters, based on these we can decide how
-to restrict the model. The last parameter (<code>card</code> in the example) is an
-instance of the model, if it is <code>nil</code> the model class was passed to the restrict
-block. The restriction can be thus called on either the model class or on a
-concrete instance: <code>Card.restrict(person)</code> vs <code>card.restrict(person)</code>.</p>
 
-<p>Heimdallr maintains a scope for fetching and deletion. Scope restriction are obviously
-useful when restricting the model class. Calling <code>all</code> on the proxied model
-returns only the cards visible by the person. Wondering how to simply ask
-whether a card instance is visible by the person? <code>card.restrict(person).visible?</code>
-does just that. For testing destroyability of a record there is <code>destroyable?</code>.</p>
-
-<p>I covered briefly scope restriction using  heimdallr in this post. However, there
-is yet more how heimdallr can help. Finer restrictions, such as attribute visibility
-and updatability are often crucial as well. But let&#8217;s leave this for later.</p>
 </div>
 
 
@@ -200,7 +184,7 @@ and updatability are often crucial as well. But let&#8217;s leave this for later
   
 
 
-<time datetime="2012-07-16T14:28:00+02:00" pubdate data-updated="true">Jul 16<span>th</span>, 2012</time>
+<time datetime="2013-07-07T07:07:00+02:00" pubdate data-updated="true">Jul 7<span>th</span>, 2013</time>
       
 
 <span class="categories">
@@ -214,7 +198,7 @@ and updatability are often crucial as well. But let&#8217;s leave this for later
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://websidedown.com/blog/restricting-models-with-heimdallr/" data-via="fifigyuri" data-counturl="http://websidedown.com/blog/restricting-models-with-heimdallr/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://websidedown.com/blog/heimdallr-with-active-model-serializers/" data-via="fifigyuri" data-counturl="http://websidedown.com/blog/heimdallr-with-active-model-serializers/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -227,10 +211,8 @@ and updatability are often crucial as well. But let&#8217;s leave this for later
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/non-modal-inline-dialogs/" title="Previous Post: Non-Modal Inline Dialogs: Ask Questions in Awesome Ways">&laquo; Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a>
+        <a class="basic-alignment left" href="/blog/backbone-object-creation/" title="Previous Post: Backbone forms: How to get ids for objects created on the client side?">&laquo; Backbone forms: How to get ids for objects created on the client side?</a>
       
-      
-        <a class="basic-alignment right" href="/blog/backbone-object-creation/" title="Next Post: Backbone forms: How to get ids for objects created on the client side?">Backbone forms: How to get ids for objects created on the client side? &raquo;</a>
       
     </p>
   </footer>
@@ -367,8 +349,8 @@ and updatability are often crucial as well. But let&#8217;s leave this for later
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://websidedown.com/blog/restricting-models-with-heimdallr/';
-        var disqus_url = 'http://websidedown.com/blog/restricting-models-with-heimdallr/';
+        var disqus_identifier = 'http://websidedown.com/blog/heimdallr-with-active-model-serializers/';
+        var disqus_url = 'http://websidedown.com/blog/heimdallr-with-active-model-serializers/';
         var disqus_script = 'embed.js';
       
     (function () {
