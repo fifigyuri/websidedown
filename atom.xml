@@ -4,7 +4,7 @@
   <title><![CDATA[Web Side Down]]></title>
   <link href="http://websidedown.com/atom.xml" rel="self"/>
   <link href="http://websidedown.com/"/>
-  <updated>2013-10-09T07:42:53+02:00</updated>
+  <updated>2013-10-09T08:01:15+02:00</updated>
   <id>http://websidedown.com/</id>
   <author>
     <name><![CDATA[George Frivolt]]></name>
@@ -12,6 +12,19 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Does your design talk to you?]]></title>
+    <link href="http://websidedown.com/blog/does-your-design-talk-to-you/"/>
+    <updated>2013-10-09T08:00:00+02:00</updated>
+    <id>http://websidedown.com/blog/does-your-design-talk-to-you</id>
+    <content type="html"><![CDATA[<p>Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and aesthetic decisions, like I don&#8217;t like a method call here and the name of the parameters there. Than it moves further into reasoning about relations between classes and objects. Splitting a class up (extraction of subclass or superclass, extraction of state/strategy, etc.) or doing the reverse unifying classes and objects, moving methods to a new home, is similar to changing the chapters of an article. The overall process should result a more readable and transparent code. And even more important is that <em>refactoring conditions software for a change.</em></p>
+
+<p>A code lacking any design decisions does not communicate its intentions. It is often not clear what is happening. As the code base grows these questions tend to be overwhelming. <em>A code with right design reduces these questions or when the question arises the answer comes instantly.</em> The intentions are well communicated by the structure of the code. However, another questions may arise objecting the design itself: &#8216;Why do we need a delegation?&#8217;, &#8216;Why does this method exist?&#8217;. Overdesigning can lead to too much of explanation even at places where the intention is clear without it.</p>
+
+<p>I think a way how to make design decisions is understanding the way it communicates with us. Follow the questions in your head you are asking. You should feel whether the code or the design is what steals the attention. If any of these does, do the necessary changes and gain back mental space to be able to make decisions and go ahead with the development.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Heimdallr with active model serializers]]></title>

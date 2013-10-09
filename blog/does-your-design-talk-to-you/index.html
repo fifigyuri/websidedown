@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: rails - Web Side Down</title>
+  <title>Does your design talk to you? - Web Side Down</title>
   <meta name="author" content="George Frivolt">
 
   
-  <meta name="description" content="Category: rails">
+  <meta name="description" content="Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://websidedown.com/blog/categories/rails/">
+  <link rel="canonical" href="http://websidedown.com/blog/does-your-design-talk-to-you/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -80,53 +80,99 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Rails</h1>
+    
+      <h1 class="entry-title">Does Your Design Talk to You?</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-09T08:00:00+02:00" pubdate data-updated="true">Oct 9<span>th</span>, 2013</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and aesthetic decisions, like I don&#8217;t like a method call here and the name of the parameters there. Than it moves further into reasoning about relations between classes and objects. Splitting a class up (extraction of subclass or superclass, extraction of state/strategy, etc.) or doing the reverse unifying classes and objects, moving methods to a new home, is similar to changing the chapters of an article. The overall process should result a more readable and transparent code. And even more important is that <em>refactoring conditions software for a change.</em></p>
 
-  
-  <h2>2013</h2>
+<p>A code lacking any design decisions does not communicate its intentions. It is often not clear what is happening. As the code base grows these questions tend to be overwhelming. <em>A code with right design reduces these questions or when the question arises the answer comes instantly.</em> The intentions are well communicated by the structure of the code. However, another questions may arise objecting the design itself: &#8216;Why do we need a delegation?&#8217;, &#8216;Why does this method exist?&#8217;. Overdesigning can lead to too much of explanation even at places where the intention is clear without it.</p>
 
-<article>
-  
-<h1><a href="/blog/heimdallr-with-active-model-serializers/">Heimdallr with active model serializers</a></h1>
-<time datetime="2013-07-07T07:07:00+02:00" pubdate><span class='month'>Jul</span> <span class='day'>07</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/rails/'>rails</a></span>
-</footer>
-
-
-</article>
-
-
-
-  
-  <h2>2012</h2>
-
-<article>
-  
-<h1><a href="/blog/restricting-models-with-heimdallr/">Restricting Models with Heimdallr</a></h1>
-<time datetime="2012-07-16T14:28:00+02:00" pubdate><span class='month'>Jul</span> <span class='day'>16</span> <span class='year'>2012</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/rails/'>rails</a></span>
-</footer>
-
-
-</article>
-
+<p>I think a way how to make design decisions is understanding the way it communicates with us. Follow the questions in your head you are asking. You should feel whether the code or the design is what steals the attention. If any of these does, do the necessary changes and gain back mental space to be able to make decisions and go ahead with the development.</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">George Frivolt</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-09T08:00:00+02:00" pubdate data-updated="true">Oct 9<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/design/'>design</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://websidedown.com/blog/does-your-design-talk-to-you/" data-via="fifigyuri" data-counturl="http://websidedown.com/blog/does-your-design-talk-to-you/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/heimdallr-with-active-model-serializers/" title="Previous Post: Heimdallr with active model serializers">&laquo; Heimdallr with active model serializers</a>
+      
+      
+    </p>
+  </footer>
 </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
 
@@ -252,7 +298,10 @@
       var disqus_shortname = 'websidedownblog';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://websidedown.com/blog/does-your-design-talk-to-you/';
+        var disqus_url = 'http://websidedown.com/blog/does-your-design-talk-to-you/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

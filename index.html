@@ -9,7 +9,7 @@
   <meta name="author" content="George Frivolt">
 
   
-  <meta name="description" content="I have introduced heimdallr in an earlier post. It is an excellent tool for securing models. heimdallr can create proxies for collections and records &hellip;">
+  <meta name="description" content="Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,46 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/does-your-design-talk-to-you/">Does Your Design Talk to You?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-09T08:00:00+02:00" pubdate data-updated="true">Oct 9<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and aesthetic decisions, like I don&#8217;t like a method call here and the name of the parameters there. Than it moves further into reasoning about relations between classes and objects. Splitting a class up (extraction of subclass or superclass, extraction of state/strategy, etc.) or doing the reverse unifying classes and objects, moving methods to a new home, is similar to changing the chapters of an article. The overall process should result a more readable and transparent code. And even more important is that <em>refactoring conditions software for a change.</em></p>
+
+<p>A code lacking any design decisions does not communicate its intentions. It is often not clear what is happening. As the code base grows these questions tend to be overwhelming. <em>A code with right design reduces these questions or when the question arises the answer comes instantly.</em> The intentions are well communicated by the structure of the code. However, another questions may arise objecting the design itself: &#8216;Why do we need a delegation?&#8217;, &#8216;Why does this method exist?&#8217;. Overdesigning can lead to too much of explanation even at places where the intention is clear without it.</p>
+
+<p>I think a way how to make design decisions is understanding the way it communicates with us. Follow the questions in your head you are asking. You should feel whether the code or the design is what steals the attention. If any of these does, do the necessary changes and gain back mental space to be able to make decisions and go ahead with the development.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -567,6 +607,10 @@ updated regularly.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/does-your-design-talk-to-you/">Does your design talk to you?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/heimdallr-with-active-model-serializers/">Heimdallr with active model serializers</a>
       </li>
     
@@ -580,10 +624,6 @@ updated regularly.</p>
     
       <li class="post">
         <a href="/blog/non-modal-inline-dialogs/">Non-Modal Inline Dialogs: Ask Questions in Awesome Ways</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/lorem-ipsum/">Lorem Ipsum</a>
       </li>
     
   </ul>
