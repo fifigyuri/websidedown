@@ -5,7 +5,6 @@ date: 2013-10-09 08:00
 comments: true
 categories: design
 ---
-
 Refactoring became an integral part of my development work-flow. I see that refactoring itself starts with very simple steps like renaming and aesthetic decisions, like I don't like a method call here and the name of the parameters there. Than it moves further into reasoning about relations between classes and objects. Splitting a class up (extraction of subclass or superclass, extraction of state/strategy, etc.) or doing the reverse unifying classes and objects, moving methods to a new home, is similar to changing the chapters of an article. The overall process should result a more readable and transparent code. And even more important is that _refactoring conditions software for a change._
 
 A code lacking any design decisions does not communicate its intentions. It is often not clear what is happening. As the code base grows these questions tend to be overwhelming. _A code with right design reduces these questions or when the question arises the answer comes instantly._ The intentions are well communicated by the structure of the code. However, another questions may arise objecting the design itself: 'Why do we need a delegation?', 'Why does this method exist?'. Overdesigning can lead to too much of explanation even at places where the intention is clear without it.
